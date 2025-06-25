@@ -68,6 +68,31 @@ for column in data.columns:
         unique_vals = data[column].unique()
         print(f"'{column}': Unique values {unique_vals}")
 
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the dataset
+data = pd.read_csv("cardio.csv")
+
+data = data.drop_duplicates()
+if 'Unnamed: 0' in data.columns:
+    data = data.drop('Unnamed: 0', axis=1)
+
+categorical_columns = ['gender', 'cholesterol', 'gluc', 'smoke', 'alco', 'active', 'cardio']
+
+for column in categorical_columns:
+    if column in data.columns:
+        value_counts = data[column].value_counts()
+        plt.figure(figsize=(6, 6))
+        value_counts.plot(kind='pie', autopct='%1.1f%%', startangle=90,
+                          colors=sns.color_palette("Set2", len(value_counts)))
+        plt.title(f'Distribution of {column}')
+        plt.ylabel('')  
+        plt.tight_layout()
+        plt.show()
+
 print(data.info())
 
 print(data.describe())

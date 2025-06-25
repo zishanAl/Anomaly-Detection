@@ -73,7 +73,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Load the dataset
 data = pd.read_csv("cardio.csv")
 
 data = data.drop_duplicates()
@@ -114,18 +113,18 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 # 1. Isolation Forest
 iso_forest = IsolationForest(
-    n_estimators=300,       # Increased number of trees
-    max_samples=0.8,        # Use 80% of samples
-    contamination=0.1,      # Approximate contamination rate
-    max_features=0.7,       # Use 70% of features for each tree
-    bootstrap=True,         # Use bootstrapping for variability
-    random_state=42         # Reproducibility
+    n_estimators=300,       
+    max_samples=0.8,        
+    contamination=0.1,      
+    max_features=0.7,       
+    bootstrap=True,         
+    random_state=42         
 )
 iso_pred = iso_forest.fit_predict(features_scaled)
 data['Isolation_Forest'] = (iso_pred == -1).astype(int)
 data['Isolation_Forest']
 
-# 2. One-Class SVM (remove contamination parameter, it doesn't exist)
+# 2. One-Class SVM 
 oc_svm = OneClassSVM(gamma='auto')
 oc_svm_pred = oc_svm.fit_predict(features_scaled)
 data['One_Class_SVM'] = (oc_svm_pred == -1).astype(int)  # Mark anomalies as 1
@@ -165,7 +164,7 @@ data['Autoencoder_Anomaly'] = (data['Autoencoder'] > threshold).astype(int)
 # Show results
 print(data[['cardio', 'Isolation_Forest', 'One_Class_SVM', 'Local_Outlier_Factor', 'Autoencoder_Anomaly']])
 
-# Evaluate the anomaly detection (optional: based on the 'target' column)
+# Evaluate the anomaly detection 
 print("\nIsolation Forest Classification Report:")
 print(classification_report(data['cardio'], data['Isolation_Forest']))
 

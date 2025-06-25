@@ -1,5 +1,3 @@
-pip install pandas numpy scikit-learn tensorflow matplotlib seaborn
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,7 +11,7 @@ from tensorflow.keras.layers import Dense
 from sklearn.metrics import classification_report
 from sklearn.metrics import classification_report, roc_auc_score, accuracy_score
 
-data = pd.read_csv("cardio_B.csv")
+data = pd.read_csv("cardio.csv")
 data.head()
 
 data.columns
@@ -21,7 +19,7 @@ data.columns
 num_duplicates = data.duplicated().sum()
 data = data.drop_duplicates(keep='first')
 
-# data = data.drop('Unnamed: 0', axis=1)
+data = data.drop('Unnamed: 0', axis=1)
 
 from sklearn.impute import SimpleImputer
 
@@ -46,7 +44,7 @@ data = data[(data['ap_hi'] < 250) & (data['ap_lo'] > 50)]
 # Reset index after cleaning
 data = data.reset_index(drop=True)
 
-# Optional: Drop original age if you only want to use age_years
+# Drop original age if you only want to use age_years
 data = data.drop('age', axis=1)
 
 # Check correlation after adding new features
@@ -90,11 +88,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # 1. Isolation Forest
-# iso_forest = IsolationForest(contamination=0.1)
-# iso_pred = iso_forest.fit_predict(features_scaled)
-# data['Isolation_Forest'] = (iso_pred == -1).astype(int)  # Mark anomalies as 1
-# data['Isolation_Forest']
-
 iso_forest = IsolationForest(
     n_estimators=300,       # Increased number of trees
     max_samples=0.8,        # Use 80% of samples
@@ -281,6 +274,8 @@ plt.tight_layout()
 # Show the plot
 plt.show()
 
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
+
 models = ['Isolation_Forest', 'One_Class_SVM', 'Local_Outlier_Factor', 'Autoencoder_Anomaly']
 
 results = []
@@ -288,34 +283,23 @@ results = []
 for model in models:
     print(f"\n📈 Evaluating {model}...")
 
-    report = classification_report(data['cardio'], data[model], output_dict=True)
     accuracy = accuracy_score(data['cardio'], data[model])
-    f1 = report['1']['f1-score'] if '1' in report else 0.0
-    roc_auc = roc_auc_score(data['cardio'], data[model])
+    precision = precision_score(data['cardio'], data[model], zero_division=0)
+    recall = recall_score(data['cardio'], data[model], zero_division=0)
+    f1 = f1_score(data['cardio'], data[model], zero_division=0)
 
     results.append({
         'Model': model,
         'Accuracy': accuracy,
-        'F1-Score': f1,
-        'ROC-AUC': roc_auc
+        'Precision': precision,
+        'Recall': recall,
+        'F1-Score': f1
     })
-
 
 results_df = pd.DataFrame(results)
 
-# Sort models:
-# - First by F1-Score (higher is better)
-# - Then by ROC-AUC (higher is better)
-results_df = results_df.sort_values(by=['F1-Score', 'ROC-AUC'], ascending=False)
-
-print("\n🔵 Model Rankings (sorted by F1-Score and ROC-AUC):")
+print("\n🔵 Model Evaluation Metrics:")
 print(results_df)
-
-best_model = results_df.iloc[0]
-print(f"\n🏆 Best Model: {best_model['Model']}")
-print(f"   → Accuracy: {best_model['Accuracy']:.4f}")
-print(f"   → F1-Score: {best_model['F1-Score']:.4f}")
-print(f"   → ROC-AUC: {best_model['ROC-AUC']:.4f}")
 
 import matplotlib.pyplot as plt
 
